@@ -145,6 +145,7 @@ dependencies {
     // For more info:
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
+    minecraftLibrary("io.github.spair:imgui-java-app:1.86.10")
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.
