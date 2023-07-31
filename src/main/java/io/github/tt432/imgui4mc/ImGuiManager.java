@@ -15,7 +15,13 @@ public class ImGuiManager {
     static TestImGui gui;
 
     private static void init() {
-        new SharedLibraryLoader().load("imgui-java");
+        final String outputFolder = "./.natives";
+        IOUtil.extractResource("imgui-java64.dll", outputFolder);
+        IOUtil.extractResource("libimgui-java64.dylib", outputFolder);
+        IOUtil.extractResource("libimgui-java64.so", outputFolder);
+        System.setProperty("imgui.library.path", outputFolder);
+
+        IOUtil.extractResource("SourceHanSans-Normal.ttc", outputFolder);
 
         long windowId = Minecraft.getInstance().getWindow().getWindow();
         gui = new TestImGui(windowId);

@@ -123,6 +123,8 @@ repositories {
     // }
 }
 
+jarJar.enable()
+
 dependencies {
     // Specify the version of Minecraft to use.
     // Any artifact can be supplied so long as it has a "userdev" classifier artifact and is a compatible patcher artifact.
@@ -149,6 +151,12 @@ dependencies {
         exclude group: 'org.lwjgl'
     }
     minecraftLibrary ("io.github.spair:imgui-java-lwjgl3:$imguiVersion") {
+        exclude group: 'org.lwjgl'
+    }
+    jarJar(group: 'io.github.spair', name: 'imgui-java-binding', version: '[1.0,2.0)') {
+        exclude group: 'org.lwjgl'
+    }
+    jarJar(group: 'io.github.spair', name: 'imgui-java-lwjgl3', version: '[1.0,2.0)') {
         exclude group: 'org.lwjgl'
     }
 }
