@@ -21,6 +21,8 @@ public class ImGuiManager {
         IOUtil.extractResource("libimgui-java64.so", outputFolder);
         System.setProperty("imgui.library.path", outputFolder);
 
+        IOUtil.extractResource("SourceHanSans-Normal.ttc", outputFolder);
+
         long windowId = Minecraft.getInstance().getWindow().getWindow();
         gui = new TestImGui(windowId);
         gui.init();
