@@ -155,7 +155,7 @@ public class SharedLibraryLoader {
                 if (extractedFile == null) throw new RuntimeException(
                         "Unable to find writable path to extract file. Is the user home directory writable?");
             }
-            return extractFile(sourcePath, sourceCrc, extractedFile);
+            return extractFile(sourcePath, extractedFile);
         } catch (RuntimeException ex) {
             // Fallback to file at java.library.path location, eg for applets.
             File file = new File(System.getProperty("java.library.path"), sourcePath);
@@ -172,7 +172,7 @@ public class SharedLibraryLoader {
      * @param dir        The location where the extracted file will be written.
      */
     public void extractFileTo(String sourcePath, File dir) throws IOException {
-        extractFile(sourcePath, crc(readFile(sourcePath)), new File(dir, new File(sourcePath).getName()));
+        extractFile(sourcePath, new File(dir, new File(sourcePath).getName()));
     }
 
     /**
@@ -250,35 +250,24 @@ public class SharedLibraryLoader {
         return false;
     }
 
-    private File extractFile(String sourcePath, String sourceCrc, File extractedFile) throws IOException {
-        String extractedCrc = null;
-        if (extractedFile.exists()) {
-            try {
-                extractedCrc = crc(new FileInputStream(extractedFile));
-            } catch (FileNotFoundException ignored) {
+    public File extractFile(String sourcePath, File extractedFile) throws IOException {
+        InputStream input = null;
+        FileOutputStream output = null;
+        try {
+            input = readFile(sourcePath);
+            extractedFile.getParentFile().mkdirs();
+            output = new FileOutputStream(extractedFile);
+            byte[] buffer = new byte[4096];
+            while (true) {
+                int length = input.read(buffer);
+                if (length == -1) break;
+                output.write(buffer, 0, length);
             }
-        }
-
-        // If file doesn't exist or the CRC doesn't match, extract it to the temp dir.
-        if (extractedCrc == null || !extractedCrc.equals(sourceCrc)) {
-            InputStream input = null;
-            FileOutputStream output = null;
-            try {
-                input = readFile(sourcePath);
-                extractedFile.getParentFile().mkdirs();
-                output = new FileOutputStream(extractedFile);
-                byte[] buffer = new byte[4096];
-                while (true) {
-                    int length = input.read(buffer);
-                    if (length == -1) break;
-                    output.write(buffer, 0, length);
-                }
-            } catch (IOException ex) {
-                throw new RuntimeException("Error extracting file: " + sourcePath + "\nTo: " + extractedFile.getAbsolutePath(), ex);
-            } finally {
-                closeQuietly(input);
-                closeQuietly(output);
-            }
+        } catch (IOException ex) {
+            throw new RuntimeException("Error extracting file: " + sourcePath + "\nTo: " + extractedFile.getAbsolutePath(), ex);
+        } finally {
+            closeQuietly(input);
+            closeQuietly(output);
         }
 
         return extractedFile;
@@ -289,12 +278,10 @@ public class SharedLibraryLoader {
      * exception if all fail.
      */
     private void loadFile(String sourcePath) {
-        String sourceCrc = crc(readFile(sourcePath));
-
         String fileName = new File(sourcePath).getName();
 
-        File file = new File(".natives/" + sourceCrc, fileName);
-        if (loadFile(sourcePath, sourceCrc, file) == null) return;
+        File file = new File(".natives", fileName);
+        if (loadFile(sourcePath, file) == null) return;
 
         // Fallback to java.library.path location, eg for applets.
         file = new File(System.getProperty("java.library.path"), sourcePath);
@@ -306,9 +293,9 @@ public class SharedLibraryLoader {
     /**
      * @return null if the file was extracted and loaded.
      */
-    private Throwable loadFile(String sourcePath, String sourceCrc, File extractedFile) {
+    private Throwable loadFile(String sourcePath, File extractedFile) {
         try {
-            System.load(extractFile(sourcePath, sourceCrc, extractedFile).getAbsolutePath());
+            System.load(extractFile(sourcePath, extractedFile).getAbsolutePath());
             return null;
         } catch (Throwable ex) {
             return ex;
