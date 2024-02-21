@@ -1,13 +1,10 @@
 package io.github.tt432.imgui4mc;
 
 import net.minecraft.client.Minecraft;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.Mod;
-import net.neoforged.neoforge.event.TickEvent;
-
-import java.io.File;
-import java.io.IOException;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 
 /**
  * @author TT432
@@ -18,14 +15,13 @@ public class ImGuiManager {
     static TestImGui gui;
 
     private static void init() {
-        SharedLibraryLoader loader = new SharedLibraryLoader();
-        try {
-            String name = loader.mapLibraryName("imgui-java");
-            loader.extractFile(name, new File(".natives", new File(name).getName()));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        System.setProperty("imgui.library.path", ".natives");
+        final String outputFolder = "./.natives";
+        IOUtil.extractResource("imgui-java64.dll", outputFolder);
+        IOUtil.extractResource("libimgui-java64.dylib", outputFolder);
+        IOUtil.extractResource("libimgui-java64.so", outputFolder);
+        System.setProperty("imgui.library.path", outputFolder);
+
+        IOUtil.extractResource("SourceHanSans-Normal.ttc", outputFolder);
 
         long windowId = Minecraft.getInstance().getWindow().getWindow();
         gui = new TestImGui(windowId);
