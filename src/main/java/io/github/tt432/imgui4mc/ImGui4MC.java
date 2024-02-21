@@ -1,6 +1,7 @@
 package io.github.tt432.imgui4mc;
 
-import net.minecraftforge.fml.common.Mod;
+
+import net.neoforged.fml.common.Mod;
 
 @Mod(ImGui4MC.MOD_ID)
 public class ImGui4MC {
