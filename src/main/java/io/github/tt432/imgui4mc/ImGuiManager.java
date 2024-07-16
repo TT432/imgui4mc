@@ -1,5 +1,7 @@
 package io.github.tt432.imgui4mc;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
@@ -10,9 +12,10 @@ import net.minecraftforge.fml.common.Mod;
  * @author TT432
  */
 @Mod.EventBusSubscriber(Dist.CLIENT)
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ImGuiManager {
-    static boolean init;
-    static TestImGui gui;
+    private static boolean init;
+    private static TestImGui gui;
 
     private static void init() {
         final String outputFolder = "./.natives";

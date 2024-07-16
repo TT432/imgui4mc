@@ -121,11 +121,16 @@ dependencies {
     // then special handling is done to allow a setup of a vanilla dependency without the use of an external repository.
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
-    minecraftLibrary("io.github.spair:imgui-java-binding:$imguiVersion") {
+    jarJar(minecraftLibrary("io.github.spair:imgui-java-binding:$imguiVersion") {
         exclude group: 'org.lwjgl'
+    }) {
+        jarJar.ranged(it, "[$imguiVersion,)")
     }
-    minecraftLibrary("io.github.spair:imgui-java-lwjgl3:$imguiVersion") {
+
+    jarJar(minecraftLibrary("io.github.spair:imgui-java-lwjgl3:$imguiVersion") {
         exclude group: 'org.lwjgl'
+    }) {
+        jarJar.ranged(it, "[$imguiVersion,)")
     }
 
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
@@ -135,12 +140,8 @@ jar {
     archiveClassifier = 'slim'
 }
 
-jar.dependsOn(shadowJar)
-
-shadowJar {
-    configurations = [project.configurations.minecraftLibrary]
+tasks['jarJar'].configure {
     archiveClassifier = ''
-    finalizedBy 'reobfJar'
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.
