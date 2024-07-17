@@ -22,6 +22,7 @@ public class ImGuiManager {
         IOUtil.extractResource("imgui-java64.dll", outputFolder);
         IOUtil.extractResource("libimgui-java64.dylib", outputFolder);
         IOUtil.extractResource("libimgui-java64.so", outputFolder);
+        IOUtil.extractResource("libimgui-javaarm64.dylib", outputFolder);
         System.setProperty("imgui.library.path", outputFolder);
 
         IOUtil.extractResource("SourceHanSans-Normal.ttc", outputFolder);
