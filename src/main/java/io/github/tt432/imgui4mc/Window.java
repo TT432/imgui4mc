@@ -1,6 +1,7 @@
 package io.github.tt432.imgui4mc;
 
 import imgui.ImGui;
+import imgui.extension.implot.ImPlot;
 import imgui.flag.ImGuiConfigFlags;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
@@ -26,7 +27,7 @@ public abstract class Window {
     public void init() {
         initImGui();
         imGuiGlfw.init(handle, true);
-        imGuiGl3.init("#version 150");
+        imGuiGl3.init();
     }
 
     /**
@@ -34,6 +35,7 @@ public abstract class Window {
      */
     protected void initImGui() {
         ImGui.createContext();
+        ImPlot.createContext();
     }
 
     /**
