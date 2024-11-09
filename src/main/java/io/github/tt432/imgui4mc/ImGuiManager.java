@@ -1,5 +1,6 @@
 package io.github.tt432.imgui4mc;
 
+import io.github.tt432.imgui4mc.config.ImGuiConfig;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,21 +22,29 @@ import java.util.Objects;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @Slf4j
 public class ImGuiManager {
-    private static final List<Window> windows = new ArrayList<>();
+    private static final List<ImGuiWindowElements> elements = new ArrayList<>();
+    private static Window window;
 
     @EventBusSubscriber(Dist.CLIENT)
     public static final class ForgeEvents {
         @SubscribeEvent
         public static void onEvent(RenderFrameEvent.Post event) {
-            if (gui != null) gui.runFrame();
-
-            for (Window window : windows) {
-                window.runFrame();
-            }
+            if (window != null && ImGuiConfig.CONFIG.openImGui.get()) window.runFrame();
         }
     }
 
     public static void loadWindows(long windowId) {
+        window = new Window(windowId) {
+            @Override
+            public void process() {
+                for (ImGuiWindowElements element : elements) {
+                    element.process(this);
+                }
+            }
+        };
+
+        window.preInit();
+
         Type annotationType = Type.getType(RegisterImGui.class);
         List<ModFileScanData> allScanData = ModList.get().getAllScanData();
 
@@ -49,23 +58,18 @@ public class ImGuiManager {
                     try {
                         Class<?> clazz = Class.forName(className, false,
                                 ImGuiManager.class.getClassLoader());
-                        if (Window.class.isAssignableFrom(clazz)) {
-                            Window window = (Window) clazz.getConstructor(long.class).newInstance(windowId);
-                            window.init();
-                            windows.add(window);
+                        if (ImGuiWindowElements.class.isAssignableFrom(clazz)) {
+                            ImGuiWindowElements element = (ImGuiWindowElements) clazz.getConstructor().newInstance();
+                            element.init(window, windowId);
+                            elements.add(element);
                         }
                     } catch (ReflectiveOperationException | LinkageError e) {
-                        log.error("Failed to load: {}, the class must be {} and have a <init>(J)V", className, Window.class.getName(), e);
+                        log.error("Failed to load: {}, the class must be {} and have a <init>()V", className, ImGuiWindowElements.class.getName(), e);
                     }
                 }
             }
         }
-    }
 
-    private static TestImGui gui;
-
-    public static void showTestUI(long windowId) {
-        gui = new TestImGui(windowId);
-        gui.init();
+        window.postInit();
     }
 }

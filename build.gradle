@@ -2,7 +2,8 @@ plugins {
     id 'java-library'
     id 'maven-publish'
     id 'net.neoforged.moddev' version '1.0.14'
-    id "io.freefair.lombok" version "8.6"
+    id "io.freefair.lombok" version "8.10.2"
+    id 'signing'
 }
 
 tasks.named('wrapper', Wrapper).configure {
@@ -122,6 +123,15 @@ dependencies {
     }))
 }
 
+signing {
+    sign publishing.publications
+}
+
+java {
+    withSourcesJar()
+    withJavadocJar()
+}
+
 // This block of code expands all declared replace properties in the specified resource targets.
 // A missing property will result in an error. Properties are expanded using ${} Groovy notation.
 var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {
@@ -149,16 +159,47 @@ sourceSets.main.resources.srcDir generateModMetadata
 // To avoid having to run "generateModMetadata" manually, make it run on every project reload
 neoForge.ideSyncTask generateModMetadata
 
-// Example configuration to allow publishing using the maven-publish plugin
 publishing {
     publications {
-        register('mavenJava', MavenPublication) {
+        mavenJava(MavenPublication) {
             from components.java
+
+            pom {
+                name = project.mod_name
+                description = project.mod_description
+                url = "https://github.com/${githubUserName}/${githubRepoName}"
+
+                scm {
+                    connection = "scm:git:git://github.com/${githubUserName}/${githubRepoName}.git"
+                    developerConnection = "scm:git:ssh://github.com/${githubUserName}/${githubRepoName}.git"
+                    url = "https://github.com/${githubUserName}/${githubRepoName}"
+                }
+
+                licenses {
+                    license {
+                        name = 'MIT'
+                        url = "https://github.com/${githubUserName}/${githubRepoName}/tree/master/LICENSE"
+                    }
+                }
+
+                developers {
+                    developer {
+                        id = 'tt432'
+                        name = 'Chin'
+                        email = '2437315224@qq.com'
+                    }
+                }
+            }
         }
     }
+
     repositories {
         maven {
-            url "file://${project.projectDir}/repo"
+            url = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+            credentials {
+                username = project.findProperty("ossrhUsername")
+                password = project.findProperty("ossrhPassword")
+            }
         }
     }
 }

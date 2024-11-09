@@ -24,8 +24,7 @@ public abstract class Window {
     /**
      * Method to initialize application.
      */
-    public void init() {
-        initImGui();
+    public void postInit() {
         imGuiGlfw.init(handle, true);
         imGuiGl3.init();
     }
@@ -33,7 +32,7 @@ public abstract class Window {
     /**
      * Method to initialize Dear ImGui context. Could be overridden to do custom Dear ImGui setup before application start.
      */
-    protected void initImGui() {
+    protected void preInit() {
         ImGui.createContext();
         ImPlot.createContext();
     }
